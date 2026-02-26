@@ -2,7 +2,6 @@ name: Smaller Tailscale Build Pipeline
 
 on:
   workflow_dispatch: 
-  push:
   repository_dispatch:
     types: [ build-tailscale ]
 
@@ -162,7 +161,7 @@ jobs:
           ref: develop
           path: repo
 
-      - name: Set build version and prepare build scripts, package files, and keys
+      - name: Set build version
         id: get_build_version
         run: |
           VERSION=$(sed -n 's/^PKG_VERSION:=\(.*\)/\1/p' repo/package/tailscale/Makefile | tr -d '[:space:]')
@@ -239,7 +238,7 @@ jobs:
             -e TERM=xterm \
             -e FORCE=1 \
             ghcr.io/openwrt/sdk:${{ matrix.platform }}-V${{ env.OPENWRT_IPK_SDK }} \
-            bash /build_scripts/build_ipk.sh
+            bash /builder/build_scripts/build_ipk.sh
 
       - name: Build with OpenWRT 25.12 SDK Docker
         run: |
@@ -253,7 +252,7 @@ jobs:
             -e TERM=xterm \
             -e FORCE=1 \
             ghcr.io/openwrt/sdk:${{ matrix.platform }}-V${{ env.OPENWRT_APK_SDK }} \
-            bash /build_scripts/build_apk.sh
+            bash /builder/build_scripts/build_apk.sh
 
       - name: Clean up build scripts and keys
         run: |
