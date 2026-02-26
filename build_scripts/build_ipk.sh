@@ -59,6 +59,19 @@ else
     exit 1
 fi
 
+# fix for sha256sum command not found in some environments, which is required for package signing
+mkdir -p $HOME/.local/bin
+export PATH=$HOME/.local/bin:$PATH
+
+# create a symlink for sha256sum command to ensure it is available for package signing
+ln -s $(which sha256sum) $HOME/.local/bin/sha256
+
+# check if sha256 command is available
+if ! command -v sha256 &> /dev/null; then
+    echo "Error: sha256 command not found, which is required for package signing"
+    exit 1
+fi
+
 # change to package directory for index generation and signing
 cd $PKG
 
