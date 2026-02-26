@@ -44,8 +44,8 @@ define Package/tailscale
   CATEGORY:=Network
   SUBMENU:=VPN
   TITLE:=Zero config VPN (UPX Compressed)
-  URL:=Original(https://tailscale.com);Smaller(https://github.com/GuNanOvO/openwrt-tailscale)
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +kmod-tun
+  URL:=https://github.com/GuNanOvO/openwrt-tailscale
+  DEPENDS:=$(GO_ARCH_DEPENDS)
   PROVIDES:=tailscale tailscaled
 endef
 
@@ -59,6 +59,8 @@ define Package/tailscale/conffiles
 /etc/config/tailscale
 /etc/tailscale/
 endef
+
+Package/tailscale/depends:=+ca-bundle +kmod-tun
 
 define Package/tailscale/install
 	$(INSTALL_DIR) $(1)/usr/sbin $(1)/etc/init.d $(1)/etc/config
