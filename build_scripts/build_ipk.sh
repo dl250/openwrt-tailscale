@@ -49,7 +49,7 @@ echo "Building Tailscale IPK package..."
 make package/tailscale/compile V=s
 
 # check package build result
-if PKG=$(find bin/packages -name "tailscale_*.ipk" -type f 2>/dev/null | head -1); then
+if PKG=$(find bin/packages -name "tailscale_*.ipk" -type f | head -1); then
     PKG=$(dirname "$PKG")
     echo "Build Success: IPK Package generated"
     ls -lh "$PKG"

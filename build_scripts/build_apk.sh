@@ -50,10 +50,12 @@ echo "Using $(/builder/go/bin/go version)"
 make package/tailscale/compile V=s
 
 # check package build result
-if PKG=$(find bin/packages -name "tailscale_*.apk" -type f 2>/dev/null | head -1); then
-    PKG=$(dirname "$PKG")
+if PKG=$(find bin/packages -name "tailscale_*.apk" -type f | head -1); then
+    echo "pkg: $PKG"
+    PKG_DIR=$(cd "$(dirname "$PKG")" && pwd)
+    echo "pkg dir: $PKG_DIR"
     echo "Build Success: APK Package generated"
-    ls -lh "$PKG"
+    ls -lh "$PKG_DIR"
 else
     echo "Error: No build product found"
     echo "Build Failed"
@@ -61,7 +63,7 @@ else
 fi
 
 # change to package directory for index generation and signing
-cd $PKG
+cd $PKG_DIR
 
 # sign the apk package
 # 假设你的私钥是 key-build，包名是 my-pkg.apk
