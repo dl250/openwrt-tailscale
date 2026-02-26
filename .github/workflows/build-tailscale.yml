@@ -254,6 +254,11 @@ jobs:
             ghcr.io/openwrt/sdk:${{ matrix.platform }}-V${{ env.OPENWRT_APK_SDK }} \
             bash /builder/build_scripts/build_apk.sh
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        # 关键：只有当前面的步骤失败时，才会触发这个 SSH 调试
+        if: always() && failure()
+        
       - name: Clean up build scripts and keys
         run: |
           rm -rf build_scripts
