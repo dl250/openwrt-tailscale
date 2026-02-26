@@ -27,21 +27,24 @@ cp -r /builder/tailscale/. /builder/package/tailscale/
 # make defconfig to generate .config with default settings, which is required for go build
 make defconfig > /dev/null 2>&1
 
-# # check go binary
-# [ -f /builder/go/bin/go ] || { echo "Error: Go binary missing"; exit 1; }
+# check go binary
+[ -f /builder/go/bin/go ] || { echo "Error: Go binary missing"; exit 1; }
 
-# # use the pre-prepared go binary 
-# # avoid dependency resolution and installation during build
-# # which can be time-consuming and may fail due to network issues
-# # mkdir for go binary and link it to staging dir for go build
-# mkdir -p /builder/staging_dir/hostpkg/bin
-# ln -sf /builder/go/bin/go /builder/staging_dir/hostpkg/bin/go
-# ln -sf /builder/go/bin/gofmt /builder/staging_dir/hostpkg/bin/gofmt
-# if [ -d /builder/staging_dir/hostpkg/lib/go-cross/bin ]; then
-#     ln -sf /builder/go/bin/go /builder/staging_dir/hostpkg/lib/go-cross/bin/go
-# fi
+# use the pre-prepared go binary 
+# avoid dependency resolution and installation during build
+# which can be time-consuming and may fail due to network issues
+# mkdir for go binary and link it to staging dir for go build
+mkdir -p /builder/staging_dir/hostpkg/lib/go-1.26/bin
+ln -sf /builder/go/bin/go /builder/staging_dir/hostpkg/lib/go-1.26/bin/go
+ln -sf /builder/go/bin/gofmt /builder/staging_dir/hostpkg/lib/go-1.26/bin/gofmt
+if [ -d /builder/staging_dir/hostpkg/lib/go-cross/bin ]; then
+    ln -sf /builder/go/bin/go /builder/staging_dir/hostpkg/lib/go-cross/bin/go
+fi
 
-# echo "Using $(/builder/go/bin/go version)"
+# 不要注释掉缓存！只需要修正软链接到正确的“深度路径”：
+# 25.12 SDK 期望的路径是 lib/go-x.xx/bin
+
+echo "Using $(/builder/go/bin/go version)"
 
 # build tailscale package
 make package/tailscale/compile V=s
