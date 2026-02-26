@@ -90,7 +90,7 @@ gzip -9c Packages > Packages.gz
 # check if the index file and signature file is generated
 if [ -f Packages ] && [ -s Packages.gz ] && [ -f Packages.sig ]; then
     echo "Index Generation and Signing Success: Packages, Packages.gz, and Packages.sig generated"
-    ls -lh "$PKG"
+    ls -lh
 else
     echo "Error: Package signing failed, Packages.sig not found or empty"
     exit 1
