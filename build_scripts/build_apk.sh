@@ -50,17 +50,23 @@ echo "Using $(/builder/go/bin/go version)"
 make package/tailscale/compile V=s
 
 # check package build result
-if PKG=$(find bin/packages -name "tailscale_*.apk" -type f | head -1); then
-    echo "pkg: $PKG"
-    PKG_DIR=$(cd "$(dirname "$PKG")" && pwd)
-    echo "pkg dir: $PKG_DIR"
-    echo "Build Success: APK Package generated"
-    ls -lh "$PKG_DIR"
-else
-    echo "Error: No build product found"
-    echo "Build Failed"
-    exit 1
-fi
+# if PKG=$(find bin/packages -name "tailscale_*.apk" -type f | head -1); then
+#     echo "pkg: $PKG"
+#     PKG_DIR=$(cd "$(dirname "$PKG")" && pwd)
+#     echo "pkg dir: $PKG_DIR"
+#     echo "Build Success: APK Package generated"
+#     ls -lh "$PKG_DIR"
+# else
+#     echo "Error: No build product found"
+#     echo "Build Failed"
+#     exit 1
+# fi
+# 自动定位 APK 目录 (更健壮的 find)
+PKG_PATH=$(find bin/packages -name "tailscale*.apk" | head -n 1)
+[ -z "$PKG_PATH" ] && { echo "Error: No APK found"; exit 1; }
+
+PKG_DIR=$(dirname "$(realpath "$PKG_PATH")")
+echo "Found packages in: $PKG_DIR"
 
 # change to package directory for index generation and signing
 cd $PKG_DIR
