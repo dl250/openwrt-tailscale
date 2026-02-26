@@ -64,18 +64,19 @@ fi
 cd $PKG
 
 # sign the apk package
-/builder/staging_dir/host/bin/abuild-sign -k /builder/keys/key-build.rsa *.apk
+# 假设你的私钥是 key-build，包名是 my-pkg.apk
+/builder/staging_dir/host/bin/apk adesign --sign-key /builder/keys/key-build.rsa.priv *.apk
 
 # generate index for apk repository
 /builder/staging_dir/host/bin/apk index -o packages.adb *.apk
 
 # sign the index file
-/builder/staging_dir/host/bin/abuild-sign -k /builder/keys/key-build.rsa packages.adb
+/builder/staging_dir/host/bin/usign -S -m packages.adb -s /builder/keys/key-build.rsa.priv -x packages.adb.asc
 
 # check if the index file and signature file is generated
 if [ -f packages.adb ] && [ -f packages.adb.asc ]; then
     echo "Index Generation and Signing Success: packages.adb and packages.adb.asc generated"
-    ls -lh "$PKG"
+    ls -lh
 else
     echo "Error: Package signing failed, packages.adb or packages.adb.asc not found or empty"
     exit 1

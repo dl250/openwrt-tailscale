@@ -192,7 +192,7 @@ jobs:
           
           mkdir keys
           echo "$USIGN_SECRET_KEY_B64" | base64 -d > keys/key-build.sec
-          echo "$RSA_SECRET_KEY_B64" | base64 -d > keys/key-build.rsa
+          echo "$RSA_SECRET_KEY_B64" | base64 -d > keys/key-build.rsa.priv
 
       - name: Restore UPX Cache
         uses: actions/cache@v4
