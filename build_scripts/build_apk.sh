@@ -65,13 +65,13 @@ cd $PKG
 
 # sign the apk package
 # 假设你的私钥是 key-build，包名是 my-pkg.apk
-/builder/staging_dir/host/bin/apk adesign --sign-key /builder/keys/key-build.rsa.priv *.apk
+/builder/staging_dir/host/bin/apk adbsign --sign-key /builder/keys/key-build.rsa.priv *.apk
 
 # generate index for apk repository
 /builder/staging_dir/host/bin/apk index -o packages.adb *.apk
 
 # sign the index file
-/builder/staging_dir/host/bin/usign -S -m packages.adb -s /builder/keys/key-build.rsa.priv -x packages.adb.asc
+/builder/staging_dir/host/bin/apk adbsign --sign-key /builder/keys/key-build.rsa.priv packages.adb
 
 # check if the index file and signature file is generated
 if [ -f packages.adb ] && [ -f packages.adb.asc ]; then
