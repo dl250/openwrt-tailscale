@@ -48,7 +48,7 @@ jobs:
           key: upx-linux-amd64-${{ steps.check_upx.outputs.upx_ver }}
 
       - name: Prepare UPX
-        if: steps.cache_upx.outputs.cache-hit != true
+        if: steps.cache_upx.outputs.cache-hit != 'true'
         run: |
           UPX_URL="https://github.com/upx/upx/releases/download/$UPX_TAG/upx-${UPX_VER}-amd64_linux.tar.xz"
           echo "Downloading UPX from: $UPX_URL"
@@ -59,7 +59,7 @@ jobs:
           rm -f upx.tar.xz
 
       - name: Save UPX Cache
-        if: steps.cache_upx.outputs.cache-hit != true
+        if: steps.cache_upx.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: upx
@@ -86,7 +86,7 @@ jobs:
           key: go-linux-amd64-${{ steps.check_go.outputs.go_version }}
 
       - name: Prepare Go
-        if: steps.cache_go.outputs.cache-hit != true
+        if: steps.cache_go.outputs.cache-hit != 'true'
         run: |
           GO_OS=linux
           GO_ARCH=amd64
@@ -98,7 +98,7 @@ jobs:
           rm -f go.tar.gz
       
       - name: Save Go Cache
-        if: steps.cache_go.outputs.cache-hit != true
+        if: steps.cache_go.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: go
