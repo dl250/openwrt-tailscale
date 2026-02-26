@@ -11,6 +11,7 @@ set -e
 cd /builder
 
 # initialize feeds and install golang
+echo "Initializing feeds and installing golang package..."
 ./scripts/feeds update packages > /dev/null
 ./scripts/feeds install golang > /dev/null
 
@@ -44,10 +45,12 @@ fi
 echo "Using $(/builder/go/bin/go version)"
 
 # build tailscale package
+echo "Building Tailscale IPK package..."
 make package/tailscale/compile V=s
 
 # check package build result
 if PKG=$(find bin/packages -name "tailscale_*.ipk" -type f 2>/dev/null | head -1); then
+    PKG=$(dirname "$PKG")
     echo "Build Success: IPK Package generated"
     ls -lh "$PKG"
 else

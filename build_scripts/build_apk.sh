@@ -48,6 +48,7 @@ make package/tailscale/compile V=s
 
 # check package build result
 if PKG=$(find bin/packages -name "tailscale_*.apk" -type f 2>/dev/null | head -1); then
+    PKG=$(dirname "$PKG")
     echo "Build Success: APK Package generated"
     ls -lh "$PKG"
 else
