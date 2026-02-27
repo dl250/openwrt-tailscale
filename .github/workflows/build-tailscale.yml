@@ -238,7 +238,7 @@ jobs:
             -e TERM=xterm \
             -e FORCE=1 \
             ghcr.io/openwrt/sdk:${{ matrix.platform }}-V${{ env.OPENWRT_IPK_SDK }} \
-            bash /builder/build_scripts/build_ipk.sh
+            bash /builder/build_scripts/build_ipk.sh "${{ steps.get_build_version.outputs.version }}" "${{ matrix.platform }}"
 
       - name: Build with OpenWRT 25.12 SDK Docker
         run: |
@@ -252,11 +252,7 @@ jobs:
             -e TERM=xterm \
             -e FORCE=1 \
             ghcr.io/openwrt/sdk:${{ matrix.platform }}-V${{ env.OPENWRT_APK_SDK }} \
-            bash /builder/build_scripts/build_apk.sh
-
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   if: always() && failure()
+            bash /builder/build_scripts/build_apk.sh "${{ steps.get_build_version.outputs.version }}" "${{ matrix.platform }}"
         
       - name: Clean up build scripts and keys
         run: |
@@ -269,40 +265,13 @@ jobs:
       - name: Collect build artifacts
         shell: bash
         run: |
-          mkdir -p "${{ env.ARTIFACT_DIR }}"
+          mkdir -p "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}"
 
-          cp -v bin/packages/* "${{ env.ARTIFACT_DIR }}/" 2>/dev/null || true
+          cp bin/packages/${{ matrix.platform }}/base/{Packages,Packages.gz,Packages.sig,packages.adb,tailscale_*.ipk,tailscale_*.apk} \ 
+            "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}/" 2>/dev/null || true
 
-          # echo "Searching for IPK for platform: ${{ matrix.platform }}..."
-          
-          # if [ -d "bin/packages/${{ matrix.platform }}" ]; then
-          #   mapfile -t ipk_files < <(find "bin/packages/${{ matrix.platform }}" -name "tailscale_*.ipk" -type f)
-          # else
-          #   mapfile -t ipk_files < <(find bin -name "tailscale_*.ipk" -type f)
-          # fi
-
-          # if [ ${#ipk_files[@]} -eq 0 ]; then
-          #   echo "::error::No IPK files found for ${{ matrix.platform }}!"
-          #   exit 1
-          # fi
-
-          # source_ipk=$(ls -t "${ipk_files[@]}" | head -n 1)
-          
-          # target_ipk="${{ env.ARTIFACT_DIR }}/tailscale_${{ steps.get_build_version.outputs.version }}_${{ matrix.platform }}.ipk"
-
-          # echo "Found IPK: $source_ipk"
-          # echo "Collecting to: $target_ipk"
-          
-          # cp -v "$source_ipk" "$target_ipk"
-
-          # if [ ! -s "$target_ipk" ]; then
-          #   echo "::error::Artifact collection failed: $target_ipk is missing or empty!"
-          #   exit 1
-          # fi
-
-          # echo "Success: Artifact ready in ${{ env.ARTIFACT_DIR }}"
-          # ls -lh "${{ env.ARTIFACT_DIR }}"
-
+          echo "Artifact collection attempted for platform: ${{ matrix.platform }}. Contents of artifact directory:"
+          ls -la "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}/"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
