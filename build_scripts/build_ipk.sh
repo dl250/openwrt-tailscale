@@ -67,7 +67,6 @@ export LD_LIBRARY_PATH=/builder/staging_dir/host/lib:$LD_LIBRARY_PATH
 # create a symlink for sha256sum command to ensure it is available for package signing
 ln -s $(which sha256sum) $HOME/.local/bin/sha256
 ln -s /builder/staging_dir/host/bin/* $HOME/.local/bin/ || true
-# ln -s /builder/staging_dir/host/bin/* $HOME/.local/bin/ || true
 
 # check if sha256 command is available
 if ! command -v sha256 &> /dev/null; then

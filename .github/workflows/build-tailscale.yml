@@ -192,7 +192,7 @@ jobs:
           
           mkdir keys
           echo "$USIGN_SECRET_KEY_B64" | base64 -d > keys/key-build.sec
-          echo "$RSA_SECRET_KEY_B64" | base64 -d > keys/key-build.rsa.priv
+          echo "$RSA_SECRET_KEY_B64" | base64 -d > keys/key-build.rsa
 
       - name: Restore UPX Cache
         uses: actions/cache@v4
@@ -254,10 +254,9 @@ jobs:
             ghcr.io/openwrt/sdk:${{ matrix.platform }}-V${{ env.OPENWRT_APK_SDK }} \
             bash /builder/build_scripts/build_apk.sh
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        # 关键：只有当前面的步骤失败时，才会触发这个 SSH 调试
-        if: always() && failure()
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   if: always() && failure()
         
       - name: Clean up build scripts and keys
         run: |

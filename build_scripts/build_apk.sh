@@ -71,21 +71,19 @@ echo "Found packages in: $PKG_DIR"
 # change to package directory for index generation and signing
 cd $PKG_DIR
 
-# sign the apk package
-# 假设你的私钥是 key-build，包名是 my-pkg.apk
-/builder/staging_dir/host/bin/apk adbsign --allow-untrusted --sign-key /builder/keys/key-build.rsa.priv *.apk
-
-# generate index for apk repository
-/builder/staging_dir/host/bin/apk index --allow-untrusted -o packages.adb *.apk
-
-# sign the index file
-/builder/staging_dir/host/bin/apk adbsign --allow-untrusted --sign-key /builder/keys/key-build.rsa.priv packages.adb
+# generate index for apk repository and sign it with the provided RSA key
+/builder/staging_dir/host/bin/apk mkndx \
+    --output packages.adb \
+    --sign-key /builder/keys/key-build.rsa \
+    --keys-dir /builder/keys/ \
+    --allow-untrusted \
+    *.apk
 
 # check if the index file and signature file is generated
-if [ -f packages.adb ] && [ -f packages.adb.asc ]; then
-    echo "Index Generation and Signing Success: packages.adb and packages.adb.asc generated"
+if [ -f packages.adb ] ; then
+    echo "Index Generation and Signing Success: packages.adb generated"
     ls -lh
 else
-    echo "Error: Package signing failed, packages.adb or packages.adb.asc not found or empty"
+    echo "Error: Package signing failed, packages.adb not found or empty"
     exit 1
 fi
