@@ -54,8 +54,8 @@ echo "Using $(/builder/go/bin/go version)"
 make package/tailscale/compile V=s
 
 # check package build result
-if [ -f /builder/bin/packages/$TARGET_ARCH/tailscale_${PKG_VERSION}-r1_$TARGET_ARCH.apk ]; then
-    echo "Build Success: APK Package generated at /builder/bin/packages/$TARGET_ARCH/tailscale_${PKG_VERSION}-r1_$TARGET_ARCH.apk"
+if [ -f /builder/bin/packages/$TARGET_ARCH/tailscale_${PKG_VERSION}-r1.apk ]; then
+    echo "Build Success: APK Package generated at /builder/bin/packages/$TARGET_ARCH/tailscale_${PKG_VERSION}-r1.apk"
     ls -lh /builder/bin/packages/$TARGET_ARCH/
 else
     echo "Error: No build product found at expected location"
