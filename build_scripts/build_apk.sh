@@ -54,18 +54,18 @@ echo "Using $(/builder/go/bin/go version)"
 make package/tailscale/compile V=s
 
 # check package build result
-if [ -f /builder/bin/packages/$TARGET_ARCH/base/tailscale_${PKG_VERSION}-r1.apk ]; then
-    echo "Build Success: APK Package generated at /builder/bin/packages/$TARGET_ARCH/base/tailscale_${PKG_VERSION}-r1.apk"
-    ls -lh /builder/bin/packages/$TARGET_ARCH/base/
+if [ -f /builder/bin/packages/${TARGET_ARCH}/base/tailscale-${PKG_VERSION}-r1.apk ]; then
+    echo "Build Success: APK Package generated at /builder/bin/packages/${TARGET_ARCH}/base/tailscale-${PKG_VERSION}-r1.apk"
+    ls -lh /builder/bin/packages/${TARGET_ARCH}/base/
 else
     echo "Error: No build product found at expected location"
     exit 1
 fi
 
 # change to package directory for index generation and signing
-cd /builder/bin/packages/$TARGET_ARCH/
+cd /builder/bin/packages/${TARGET_ARCH}/
 
-mv tailscale_${PKG_VERSION}-r1.apk tailscale_${PKG_VERSION}-r1_$TARGET_ARCH.apk
+mv tailscale-${PKG_VERSION}-r1.apk tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.apk
 
 # generate index for apk repository and sign it with the provided RSA key
 /builder/staging_dir/host/bin/apk mkndx \
@@ -73,7 +73,7 @@ mv tailscale_${PKG_VERSION}-r1.apk tailscale_${PKG_VERSION}-r1_$TARGET_ARCH.apk
     --sign-key /builder/keys/key-build.rsa \
     --keys-dir /builder/keys/ \
     --allow-untrusted \
-    tailscale_${PKG_VERSION}-r1_$TARGET_ARCH.apk
+    tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.apk
 
 # check if the index file and signature file is generated
 if [ -f packages.adb ] ; then

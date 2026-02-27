@@ -53,9 +53,9 @@ echo "Building Tailscale IPK package..."
 make package/tailscale/compile V=s
 
 # check package build result
-if [ -f /builder/bin/packages/$TARGET_ARCH/base/tailscale_${PKG_VERSION}-r1_$TARGET_ARCH.ipk ]; then
-    echo "Build Success: IPK Package generated at /builder/bin/packages/$TARGET_ARCH/tailscale_${PKG_VERSION}-1_$TARGET_ARCH.ipk"
-    ls -lh /builder/bin/packages/$TARGET_ARCH/base/
+if [ -f /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.ipk ]; then
+    echo "Build Success: IPK Package generated at /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.ipk"
+    ls -lh /builder/bin/packages/${TARGET_ARCH}/base/
 else
     echo "Error: No build product found at expected location"
     echo "Build Failed"
