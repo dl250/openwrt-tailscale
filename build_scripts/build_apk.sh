@@ -63,7 +63,7 @@ else
 fi
 
 # change to package directory for index generation and signing
-cd /builder/bin/packages/${TARGET_ARCH}/
+cd /builder/bin/packages/${TARGET_ARCH}/base
 
 mv tailscale-${PKG_VERSION}-r1.apk tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.apk
 

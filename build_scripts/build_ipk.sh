@@ -78,7 +78,7 @@ if ! command -v sha256 &> /dev/null; then
 fi
 
 # change to package directory for index generation and signing
-cd /builder/bin/packages/$TARGET_ARCH/base
+cd /builder/bin/packages/${TARGET_ARCH}/base
 
 # generate Packages and Packages.gz for opkg repository
 /builder/scripts/ipkg-make-index.sh . > Packages
