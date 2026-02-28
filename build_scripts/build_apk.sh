@@ -77,7 +77,7 @@ cd /builder/bin/packages/${TARGET_ARCH}/base
     --sign-key /builder/keys/key-build.rsa \
     --keys-dir /builder/keys/ \
     --allow-untrusted \
-    tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.apk
+    tailscale_${PKG_VERSION}_${TARGET_ARCH}.apk
 
 # check if the index file and signature file is generated
 if [ -f packages.adb ] ; then
