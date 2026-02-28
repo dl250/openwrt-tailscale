@@ -67,13 +67,11 @@ echo "Renaming generated IPK package to standard format..."
 mv /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.ipk /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARGET_ARCH}.ipk
 ls -lh /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARGET_ARCH}.ipk
 
-# fix for sha256sum command not found in some environments, which is required for package signing
-echo "Solving potential sha256sum command not found issue for package signing..."
+# fix for sha256 command not found in some environments, which is required for package signing
+echo "Solving potential sha256 command not found issue for package signing..."
 export PATH=/builder/staging_dir/host/bin:$PATH
 export LD_LIBRARY_PATH=/builder/staging_dir/host/lib:$LD_LIBRARY_PATH
-
-# alias sha256 to sha256sum for compatibility with usign
-alias sha256=sha256sum
+ln -sf $(which sha256sum) /builder/staging_dir/host/bin/sha256
 
 # check if sha256 command is available
 if ! command -v sha256 &> /dev/null; then
