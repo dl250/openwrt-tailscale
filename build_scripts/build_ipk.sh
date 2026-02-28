@@ -50,7 +50,7 @@ echo "Using $(/builder/go/bin/go version)"
 
 # build tailscale package
 echo "Building Tailscale IPK package..."
-make package/tailscale/compile V=s
+make package/tailscale/compile -j$(nproc) V=99
 
 # check package build result
 if [ -f /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.ipk ]; then

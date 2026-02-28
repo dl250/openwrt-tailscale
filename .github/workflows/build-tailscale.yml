@@ -263,16 +263,25 @@ jobs:
       # UPLOAD
 
       - name: Collect build artifacts
-        shell: bash
+        env:
+          artifacts: "Packages Packages.gz Packages.sig packages.adb tailscale_*.ipk tailscale_*.apk"
         run: |
           mkdir -p "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}"
 
-          cp bin/packages/${{ matrix.platform }}/base/{Packages,Packages.gz,Packages.sig,packages.adb,tailscale_*.ipk,tailscale_*.apk} \ 
-            "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}/" 2>/dev/null || true
-
+          for pattern in $artifacts; do
+            if [ -f "bin/packages/${{ matrix.platform }}/base/$pattern" ]; then
+              echo "Collecting artifact: $pattern"
+              cp -v bin/packages/${{ matrix.platform }}/base/$pattern "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}/" 2>/dev/null || true
+            else
+              echo "Collecting failed: Artifact not found $pattern"
+              exit 0
+            fi
+          done
+          
           echo "Artifact collection attempted for platform: ${{ matrix.platform }}. Contents of artifact directory:"
           ls -la "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}/"
-      - name: Upload artifact
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: tailscale_${{ steps.get_build_version.outputs.version }}_${{ matrix.platform }}
