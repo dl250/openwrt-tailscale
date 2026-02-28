@@ -70,7 +70,7 @@ ls -lh /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARG
 # fix for sha256 command not found in some environments, which is required for package signing
 echo "Solving potential sha256 command not found issue for package signing..."
 mkdir -p /tmp/bin
-export BINPATH=/tmp/bin:$PATH
+export PATH=/tmp/bin:$PATH
 ln -sf $(which sha256sum) /tmp/bin/sha256
 
 # check if sha256 command is available

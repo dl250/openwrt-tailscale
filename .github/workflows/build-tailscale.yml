@@ -300,6 +300,8 @@ jobs:
       RELEASE_VERSION: ${{ needs.build.outputs.version }}
       BUILD_DATE: ${{ needs.build.outputs.date }}
     steps:
+
+      # PREPARE
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -310,6 +312,8 @@ jobs:
           echo "Downloaded artifacts:"
           ls -R ${{ env.ARTIFACT_DIR }}
 
+      # ORGANIZE
+      
       - name: Organize artifacts
         run: |
           ARTIFACTS_JSON=${{ env.ARTIFACT_DIR }}/artifacts.json
@@ -359,42 +363,36 @@ jobs:
           ls -R ${{ env.ARTIFACT_DIR }}
 
 
+      # # DEPLOY
+
       # - name: Deploy to Feed Branch
       #   env:
       #     USIGN_SECRET_KEY_B64: ${{ secrets.USIGN_SECRET_KEY_B64 }}
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #   run: |
-      #     # 1. 配置 Git 用户信息
+      #     # Configure Git for committing and pushing changes
       #     git config --global user.name "github-actions[bot]"
       #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      #     # 删除本地 feed 分支
+      #     # Create a new orphan branch for the feed
       #     mkdir deploy_workspace
       #     cd deploy_workspace
       #     git init
 
+      #     # Set up remote with authentication using the GITHUB_TOKEN
       #     git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
       #     git checkout --orphan feed
 
-      #     # 创建 orphan 分支
+      #     # Fetch the latest main branch to get the feed template
       #     git fetch origin main --depth=1
       #     git checkout origin/main -- feed_template/
 
       #     cp -r feed_template/* ./
       #     rm -rf feed_template
 
-      #     # 创建 .nojekyll
       #     touch .nojekyll
           
-      #     # 拷贝新生成的文件
-      #     cp ../${{ env.ARTIFACT_DIR }}/tailscale_*.ipk ./
-      #     cp ../${{ env.ARTIFACT_DIR }}/Packages ./
-      #     cp ../${{ env.ARTIFACT_DIR }}/Packages.gz ./
-
-      #     # 签名逻辑
-      #     echo "$USIGN_SECRET_KEY_B64" | base64 -d > key-build.sec
-      #     usign -S -m Packages -s key-build.sec -x Packages.sig
-      #     rm -f key-build.sec
+      #     cp ../${{ env.ARTIFACT_DIR }}/* ./
 
       #     generate_tbody() {
       #       echo "          <tbody>"
