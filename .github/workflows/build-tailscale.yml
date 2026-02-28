@@ -264,7 +264,7 @@ jobs:
 
       - name: Collect build artifacts
         env:
-          artifacts: "Packages Packages.gz Packages.sig packages.adb tailscale_*.ipk tailscale_*.apk"
+          artifacts: "Packages Packages.gz Packages.sig packages.adb tailscale_${{  steps.get_build_version.outputs.version }}_${{ matrix.platform }}.ipk tailscale_${{ steps.get_build_version.outputs.version }}_${{ matrix.platform }}.apk"
         run: |
           mkdir -p "${{ env.ARTIFACT_DIR }}/${{ matrix.platform }}"
 
@@ -297,76 +297,82 @@ jobs:
   #     contents: write
   #   env:
   #     RELEASE_TAG: v${{ needs.build.outputs.version }}
-  #     VERSION: ${{ needs.build.outputs.version }}
+  #     RELEASE_VERSION: ${{ needs.build.outputs.version }}
   #     BUILD_DATE: ${{ needs.build.outputs.date }}
-  #     ARTIFACT_DIR: "release_assets"
+  #     ARTIFACT_DIR: "release_artifacts"
   #   steps:
-  #     - name: Prepare workspace
+  #     - name: Prepare release artifact directory
   #       run: mkdir -p ${{ env.ARTIFACT_DIR }}
 
   #     - name: Download artifacts
   #       uses: actions/download-artifact@v4
   #       with:
   #         path: temp_artifacts
-
-  #     - name: Organize and Generate Files
+      
+  #     - name: List downloaded artifacts
   #       run: |
-  #         JSON_FILE="${{ env.ARTIFACT_DIR }}/artifacts.json"
-  #         PACKAGES_FILE="${{ env.ARTIFACT_DIR }}/Packages"
-          
-  #         echo "[" > "$JSON_FILE"
-  #         : > "$PACKAGES_FILE" # 使用 : > 清空文件更简洁
-          
-  #         first=true
-  #         # 遍历所有下载的 artifacts 目录
-  #         for dir in temp_artifacts/*/; do
-  #           [ -d "$dir" ] || continue
-            
-  #           ipk_path=$(find "$dir" -name "tailscale_*.ipk" -type f | head -n 1)
-  #           [ -z "$ipk_path" ] && continue
-            
-  #           ipk_name=$(basename "$ipk_path")
-            
-  #           # 改进后的架构提取逻辑：提取第3个下划线之后的部分
-  #           arch=$(echo "$ipk_name" | cut -d'_' -f3- | sed 's/\.ipk$//')
-            
-  #           # 复制 IPK 到发布目录
-  #           cp "$ipk_path" "${{ env.ARTIFACT_DIR }}/"
-            
-  #           echo "Processing $ipk_name for $arch..."
-            
-  #           # 提取 control 内容
-  #           CONTROL_CONTENT=$(tar -xOzf "$ipk_path" ./control.tar.gz | tar -xOzf - ./control 2>/dev/null || \
-  #                             tar -xOzf "$ipk_path" control.tar.gz | tar -xOzf - control)
-  #           # 计算文件大小和 SHA256
-  #           FILE_SIZE=$(stat -c%s "$ipk_path")
-  #           FILE_SHA256=$(sha256sum "$ipk_path" | awk '{print $1}')
-            
-  #           # 组合写入 Packages
-  #           # 使用 sed 确保每个 control 段落后都有换行符，避免字段粘连
-  #           {
-  #             echo "$CONTROL_CONTENT" | sed '$a\' 
-  #             echo "Filename: $ipk_name"
-  #             echo "Size: $FILE_SIZE"
-  #             echo "SHA256sum: $FILE_SHA256"
-  #             echo "" 
-  #           } >> "$PACKAGES_FILE"
-            
-  #           # 写入 JSON
-  #           if [ "$first" = true ]; then
-  #             first=false
-  #           else
-  #             echo "," >> "$JSON_FILE"
-  #           fi
-  #           echo "{\"target\":\"${arch}\",\"ipk\":\"${ipk_name}\",\"sha256\":\"${FILE_SHA256}\"}" >> "$JSON_FILE"
-  #         done
-          
-  #         echo "]" >> "$JSON_FILE"
+  #         echo "Downloaded artifacts:"
+  #         ls -R temp_artifacts
+  #     - name: Organize artifacts and generate metadata
+  #       run: |
 
-  #         echo "${{ env.VERSION }}" > "${{ env.ARTIFACT_DIR }}/version"
+        
+  #       #   JSON_FILE="${{ env.ARTIFACT_DIR }}/artifacts.json"
+  #       #   PACKAGES_FILE="${{ env.ARTIFACT_DIR }}/Packages"
           
-  #         # 生成 Packages.gz
-  #         gzip -kf "$PACKAGES_FILE"
+  #       #   echo "[" > "$JSON_FILE"
+  #       #   : > "$PACKAGES_FILE" # 使用 : > 清空文件更简洁
+          
+  #       #   first=true
+  #       #   # 遍历所有下载的 artifacts 目录
+  #       #   for dir in temp_artifacts/*/; do
+  #       #     [ -d "$dir" ] || continue
+            
+  #       #     ipk_path=$(find "$dir" -name "tailscale_*.ipk" -type f | head -n 1)
+  #       #     [ -z "$ipk_path" ] && continue
+            
+  #       #     ipk_name=$(basename "$ipk_path")
+            
+  #       #     # 改进后的架构提取逻辑：提取第3个下划线之后的部分
+  #       #     arch=$(echo "$ipk_name" | cut -d'_' -f3- | sed 's/\.ipk$//')
+            
+  #       #     # 复制 IPK 到发布目录
+  #       #     cp "$ipk_path" "${{ env.ARTIFACT_DIR }}/"
+            
+  #       #     echo "Processing $ipk_name for $arch..."
+            
+  #       #     # 提取 control 内容
+  #       #     CONTROL_CONTENT=$(tar -xOzf "$ipk_path" ./control.tar.gz | tar -xOzf - ./control 2>/dev/null || \
+  #       #                       tar -xOzf "$ipk_path" control.tar.gz | tar -xOzf - control)
+  #       #     # 计算文件大小和 SHA256
+  #       #     FILE_SIZE=$(stat -c%s "$ipk_path")
+  #       #     FILE_SHA256=$(sha256sum "$ipk_path" | awk '{print $1}')
+            
+  #       #     # 组合写入 Packages
+  #       #     # 使用 sed 确保每个 control 段落后都有换行符，避免字段粘连
+  #       #     {
+  #       #       echo "$CONTROL_CONTENT" | sed '$a\' 
+  #       #       echo "Filename: $ipk_name"
+  #       #       echo "Size: $FILE_SIZE"
+  #       #       echo "SHA256sum: $FILE_SHA256"
+  #       #       echo "" 
+  #       #     } >> "$PACKAGES_FILE"
+            
+  #       #     # 写入 JSON
+  #       #     if [ "$first" = true ]; then
+  #       #       first=false
+  #       #     else
+  #       #       echo "," >> "$JSON_FILE"
+  #       #     fi
+  #       #     echo "{\"target\":\"${arch}\",\"ipk\":\"${ipk_name}\",\"sha256\":\"${FILE_SHA256}\"}" >> "$JSON_FILE"
+  #       #   done
+          
+  #       #   echo "]" >> "$JSON_FILE"
+
+  #       #   echo "${{ env.VERSION }}" > "${{ env.ARTIFACT_DIR }}/version"
+          
+  #       #   # 生成 Packages.gz
+  #       #   gzip -kf "$PACKAGES_FILE"
       
   #     - name: Setup Usign
   #       run: |

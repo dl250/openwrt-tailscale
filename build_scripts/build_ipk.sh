@@ -50,7 +50,7 @@ echo "Using $(/builder/go/bin/go version)"
 
 # build tailscale package
 echo "Building Tailscale IPK package..."
-make package/tailscale/compile -j$(nproc) V=99
+make package/tailscale/compile -j$(nproc)
 
 # check package build result
 if [ -f /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.ipk ]; then
@@ -62,14 +62,18 @@ else
     exit 1
 fi
 
+# rename the generated ipk package to standard format: tailscale_${PKG_VERSION}_${TARGET_ARCH}.ipk
+echo "Renaming generated IPK package to standard format..."
+mv /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.ipk /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARGET_ARCH}.ipk
+ls -lh /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARGET_ARCH}.ipk
+
 # fix for sha256sum command not found in some environments, which is required for package signing
-mkdir -p $HOME/.local/bin
-export PATH=$HOME/.local/bin:$PATH
+echo "Solving potential sha256sum command not found issue for package signing..."
+export PATH=/builder/staging_dir/host/bin:$PATH
 export LD_LIBRARY_PATH=/builder/staging_dir/host/lib:$LD_LIBRARY_PATH
 
-# create a symlink for sha256sum command to ensure it is available for package signing
-ln -s $(which sha256sum) $HOME/.local/bin/sha256
-ln -s /builder/staging_dir/host/bin/* $HOME/.local/bin/ || true
+# alias sha256 to sha256sum for compatibility with usign
+alias sha256=sha256sum
 
 # check if sha256 command is available
 if ! command -v sha256 &> /dev/null; then
@@ -78,6 +82,7 @@ if ! command -v sha256 &> /dev/null; then
 fi
 
 # change to package directory for index generation and signing
+echo "Making index and signing package..."
 cd /builder/bin/packages/${TARGET_ARCH}/base
 
 # generate Packages and Packages.gz for opkg repository

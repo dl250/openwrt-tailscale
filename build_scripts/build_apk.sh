@@ -51,7 +51,7 @@ fi
 echo "Using $(/builder/go/bin/go version)"
 
 # build tailscale package
-make package/tailscale/compile -j$(nproc) V=99
+make package/tailscale/compile -j$(nproc)
 
 # check package build result
 if [ -f /builder/bin/packages/${TARGET_ARCH}/base/tailscale-${PKG_VERSION}-r1.apk ]; then
@@ -62,10 +62,14 @@ else
     exit 1
 fi
 
-# change to package directory for index generation and signing
-cd /builder/bin/packages/${TARGET_ARCH}/base
+# rename the generated apk package to standard format: tailscale_${PKG_VERSION}_${TARGET_ARCH}.apk
+echo "Renaming generated APK package to standard format..."
+mv /builder/bin/packages/${TARGET_ARCH}/base/tailscale-${PKG_VERSION}-r1.apk /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARGET_ARCH}.apk
+ls -lh /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARGET_ARCH}.apk
 
-mv tailscale-${PKG_VERSION}-r1.apk tailscale_${PKG_VERSION}-r1_${TARGET_ARCH}.apk
+# change to package directory for index generation and signing
+echo "Making index and signing index..."
+cd /builder/bin/packages/${TARGET_ARCH}/base
 
 # generate index for apk repository and sign it with the provided RSA key
 /builder/staging_dir/host/bin/apk mkndx \
