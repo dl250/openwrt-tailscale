@@ -299,94 +299,65 @@ jobs:
       RELEASE_TAG: v${{ needs.build.outputs.version }}
       RELEASE_VERSION: ${{ needs.build.outputs.version }}
       BUILD_DATE: ${{ needs.build.outputs.date }}
-      ARTIFACT_DIR: "release_artifacts"
     steps:
-      - name: Prepare release artifact directory
-        run: mkdir -p ${{ env.ARTIFACT_DIR }}
-
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: temp_artifacts
+          path: ${{ env.ARTIFACT_DIR }}
       
       - name: List downloaded artifacts
         run: |
           echo "Downloaded artifacts:"
-          ls -R temp_artifacts
+          ls -R ${{ env.ARTIFACT_DIR }}
 
-      # - name: Organize artifacts and generate metadata
-      #   run: |
-      #     ARTIFACTS_JSON=${{ env.ARTIFACT_DIR }}/artifacts.json
-          
-      #     echo "[]" > "$ARTIFACTS_JSON" # Initialize empty JSON array
-      #     for dir in temp_artifacts/*/; do
-      #       [ -d "$dir" ] || continue
-            
-      #       dir=${dir%/}
-      #       arch=${dir##*/}
-      #     done
-      #   #   JSON_FILE="${{ env.ARTIFACT_DIR }}/artifacts.json"
-      #   #   PACKAGES_FILE="${{ env.ARTIFACT_DIR }}/Packages"
-          
-      #   #   echo "[" > "$JSON_FILE"
-      #   #   : > "$PACKAGES_FILE" # 使用 : > 清空文件更简洁
-          
-      #   #   first=true
-      #   #   # 遍历所有下载的 artifacts 目录
-      #   #   for dir in temp_artifacts/*/; do
-      #   #     [ -d "$dir" ] || continue
-            
-      #   #     ipk_path=$(find "$dir" -name "tailscale_*.ipk" -type f | head -n 1)
-      #   #     [ -z "$ipk_path" ] && continue
-            
-      #   #     ipk_name=$(basename "$ipk_path")
-            
-      #   #     # 改进后的架构提取逻辑：提取第3个下划线之后的部分
-      #   #     arch=$(echo "$ipk_name" | cut -d'_' -f3- | sed 's/\.ipk$//')
-            
-      #   #     # 复制 IPK 到发布目录
-      #   #     cp "$ipk_path" "${{ env.ARTIFACT_DIR }}/"
-            
-      #   #     echo "Processing $ipk_name for $arch..."
-            
-      #   #     # 提取 control 内容
-      #   #     CONTROL_CONTENT=$(tar -xOzf "$ipk_path" ./control.tar.gz | tar -xOzf - ./control 2>/dev/null || \
-      #   #                       tar -xOzf "$ipk_path" control.tar.gz | tar -xOzf - control)
-      #   #     # 计算文件大小和 SHA256
-      #   #     FILE_SIZE=$(stat -c%s "$ipk_path")
-      #   #     FILE_SHA256=$(sha256sum "$ipk_path" | awk '{print $1}')
-            
-      #   #     # 组合写入 Packages
-      #   #     # 使用 sed 确保每个 control 段落后都有换行符，避免字段粘连
-      #   #     {
-      #   #       echo "$CONTROL_CONTENT" | sed '$a\' 
-      #   #       echo "Filename: $ipk_name"
-      #   #       echo "Size: $FILE_SIZE"
-      #   #       echo "SHA256sum: $FILE_SHA256"
-      #   #       echo "" 
-      #   #     } >> "$PACKAGES_FILE"
-            
-      #   #     # 写入 JSON
-      #   #     if [ "$first" = true ]; then
-      #   #       first=false
-      #   #     else
-      #   #       echo "," >> "$JSON_FILE"
-      #   #     fi
-      #   #     echo "{\"target\":\"${arch}\",\"ipk\":\"${ipk_name}\",\"sha256\":\"${FILE_SHA256}\"}" >> "$JSON_FILE"
-      #   #   done
-          
-      #   #   echo "]" >> "$JSON_FILE"
+      - name: Organize artifacts
+        run: |
+          ARTIFACTS_JSON=${{ env.ARTIFACT_DIR }}/artifacts.json
 
-      #   #   echo "${{ env.VERSION }}" > "${{ env.ARTIFACT_DIR }}/version"
+          echo "[]" > "$ARTIFACTS_JSON"
+
+          for dir in ${{ env.ARTIFACT_DIR }}/*/; do
+            # Get the architecture from the directory name
+            [ -d "$dir" ] || continue
+            dir=${dir%/}
+            arch=${dir##*/}
+
+            ipk_path="${{ env.ARTIFACT_DIR }}/${arch}/tailscale_${{ env.RELEASE_VERSION }}_${arch}.ipk"
+            apk_path="${{ env.ARTIFACT_DIR }}/${arch}/tailscale_${{ env.RELEASE_VERSION }}_${arch}.apk"
+
+            if [ -f "$ipk_path" ] && [ -f "$apk_path" ]; then
+              ipk_name=$(basename "$ipk_path")
+              ipk_sha=$(sha256sum "$ipk_path" | awk '{print $1}')
+              apk_name=$(basename "$apk_path")
+              apk_sha=$(sha256sum "$apk_path" | awk '{print $1}')
+
+              # Append metadata to artifacts.json
+              jq --arg target "$arch" \
+                 --arg ipk "$ipk_name" \
+                 --arg ipk_sha "$ipk_sha" \
+                 --arg apk "$apk_name" \
+                 --arg apk_sha "$apk_sha" \
+                 '. += [{target: $target, ipk: $ipk, ipk_sha256: $ipk_sha, apk: $apk, apk_sha256: $apk_sha}]' \
+                 "$ARTIFACTS_JSON" > "${ARTIFACTS_JSON}.tmp" && mv "${ARTIFACTS_JSON}.tmp" "$ARTIFACTS_JSON"
+              
+              echo "Added $arch metadata to JSON."
+            fi
+          done
+
+          echo "${{ env.RELEASE_VERSION }}" > ${{ env.ARTIFACT_DIR }}/version
+
+          # Display the contents of the artifacts directory
+          echo "Organized artifacts."
+
+          echo "Contents of artifacts.json:"
+          cat ${{ env.ARTIFACT_DIR }}/artifacts.json
           
-      #   #   # 生成 Packages.gz
-      #   #   gzip -kf "$PACKAGES_FILE"
-      
-      # - name: Setup Usign
-      #   run: |
-      #     git clone --depth 1 https://git.openwrt.org/project/usign.git
-      #     cd usign && mkdir build && cd build
-      #     cmake .. && make -j$(nproc) && sudo make install
+          echo "Contents of version file:"
+          cat ${{ env.ARTIFACT_DIR }}/version
+          
+          echo "Contents of artifact directory after organization:"
+          ls -R ${{ env.ARTIFACT_DIR }}
+
 
       # - name: Deploy to Feed Branch
       #   env:
