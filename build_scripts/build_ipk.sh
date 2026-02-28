@@ -89,11 +89,12 @@ ls -lh /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARG
 # # compress the Packages file to Packages.gz
 # gzip -9c Packages > Packages.gz
 
+cp /builder/keys/key-build.sec ./key-build
 make package/index -j$(nproc) V=s
 
 cd /builder/bin/packages/${TARGET_ARCH}/base
 # Sign the Packages file using usign with the provided private key
-/builder/staging_dir/host/bin/usign -S -m Packages -s /builder/keys/key-build.sec
+# /builder/staging_dir/host/bin/usign -S -m Packages -s /builder/keys/key-build.sec
 
 # check if the index file and signature file is generated
 if [ -f Packages ] && [ -s Packages.gz ] && [ -f Packages.sig ]; then
