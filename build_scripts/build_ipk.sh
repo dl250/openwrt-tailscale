@@ -89,7 +89,7 @@ ls -lh /builder/bin/packages/${TARGET_ARCH}/base/tailscale_${PKG_VERSION}_${TARG
 # # compress the Packages file to Packages.gz
 # gzip -9c Packages > Packages.gz
 
-make package/index -j$(nproc)
+make package/index -j$(nproc) V=s
 
 cd /builder/bin/packages/${TARGET_ARCH}/base
 # Sign the Packages file using usign with the provided private key
