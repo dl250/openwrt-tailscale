@@ -363,86 +363,104 @@ jobs:
           ls -R ${{ env.ARTIFACT_DIR }}
 
 
-      # # DEPLOY
+      # DEPLOY
 
-      # - name: Deploy to Feed Branch
-      #   env:
-      #     USIGN_SECRET_KEY_B64: ${{ secrets.USIGN_SECRET_KEY_B64 }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     # Configure Git for committing and pushing changes
-      #     git config --global user.name "github-actions[bot]"
-      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Deploy to Feed Branch
+        env:
+          USIGN_SECRET_KEY_B64: ${{ secrets.USIGN_SECRET_KEY_B64 }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure Git for committing and pushing changes
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      #     # Create a new orphan branch for the feed
-      #     mkdir deploy_workspace
-      #     cd deploy_workspace
-      #     git init
+          # Create a new orphan branch for the feed
+          mkdir deploy_workspace
+          cd deploy_workspace
+          git init
 
-      #     # Set up remote with authentication using the GITHUB_TOKEN
-      #     git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-      #     git checkout --orphan feed
+          # Set up remote with authentication using the GITHUB_TOKEN
+          git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git checkout --orphan feed
 
-      #     # Fetch the latest main branch to get the feed template
-      #     git fetch origin main --depth=1
-      #     git checkout origin/main -- feed_template/
+          # Fetch the latest main branch to get the feed template
+          git fetch origin develop --depth=1
+          git checkout origin/develop -- feed_template/
 
-      #     cp -r feed_template/* ./
-      #     rm -rf feed_template
+          cp -r feed_template/* ./
+          rm -rf feed_template
 
-      #     touch .nojekyll
+          touch .nojekyll
           
-      #     cp ../${{ env.ARTIFACT_DIR }}/* ./
+          cp ../${{ env.ARTIFACT_DIR }}/* ./
 
-      #     generate_tbody() {
-      #       echo "          <tbody>"
-      #       for file in Packages* tailscale*; do
-      #         [ -f "${file}" ] || continue
-      #         fname=$(basename "${file}")
-      #         fsize=$(du -h "${file}" | cut -f1)
-      #         fdate=$(date -r "${file}" +"%Y-%m-%d %a %H:%M:%S UTC")
-      #         echo "                        <tr>"
-      #         echo "                            <td><a href=\"$fname\">$fname</a></td>"
-      #         echo "                            <td>$fsize</td>"
-      #         echo "                            <td>$fdate</td>"
-      #         echo "                        </tr>"
-      #       done
-      #       echo "          </tbody>"
-      #     }
-
+          generate_arch_sections() {
+            jq -c '.[]' artifacts.json | while read -r item; do
+              arch=$(echo "$item" | jq -r '.target')
+              
+              echo "<details class=\"arch-section\">"
+              echo "    <summary>📂 $arch</summary>"
+              echo "    <table>"
+              echo "        <thead>"
+              echo "            <tr><th>File</th><th>Size</th><th>Sha256Sum</th></tr>"
+              echo "        </thead>"
+              echo "        <tbody>"
+              
+              if [ -d "$arch" ]; then
+                for file in "$arch"/*; do
+                  [ -f "$file" ] || continue
+                  fname=$(basename "$file")
+                  [ "$fname" == "index.html" ] && continue
+                  
+                  fsize=$(du -h "$file" | cut -f1)
+                  fsha256=$(sha256sum "$file" | cut -d' ' -f1)
+                  
+                  echo "            <tr>"
+                  echo "                <td><a href=\"$arch/$fname\">$fname</a></td>"
+                  echo "                <td class=\"size-cell\">$fsize</td>"
+                  echo "                <td class=\"sha256-cell\">$fsha256</td>"
+                  echo "            </tr>"
+                done
+              fi
+              
+              echo "        </tbody>"
+              echo "    </table>"
+              echo "</details>"
+            done
+          }
           
-      #     generate_tbody > tbody.tmp
-      #     sed -i '/<!-- tbody-anchor -->/,/<!-- end-tbody-anchor -->/ {
-      #       /<!-- tbody-anchor -->/!{
-      #         /<!-- end-tbody-anchor -->/!d
-      #       }
-      #     }' index.html
-      #     sed -i '/<!-- tbody-anchor -->/r tbody.tmp' index.html
+          generate_arch_sections > tbody.tmp
+
+          sed -i '/<!-- arch-section-anchor -->/,/<!-- end-arch-section-anchor -->/ {
+            /<!-- arch-section-anchor -->/!{
+              /<!-- end-arch-section-anchor -->/!d
+            }
+          }' index.html
+          sed -i '/<!-- arch-section-anchor -->/r tbody.tmp' index.html
             
-      #     current_date="${{ env.BUILD_DATE }}"
-      #     sed -i '/<!-- date-anchor -->/,/<!-- end-date-anchor -->/ {
-      #         /<span id="date">/ {
-      #             s#<span id="date">.*</span>#<span id="date">'"${current_date}"'</span>#
-      #         }
-      #     }' index.html
+          current_date="${{ env.BUILD_DATE }}"
+          sed -i '/<!-- date-anchor -->/,/<!-- end-date-anchor -->/ {
+              /<span id="date">/ {
+                  s#<span id="date">.*</span>#<span id="date">'"${current_date}"'</span>#
+              }
+          }' index.html
 
-      #     version=$(echo "${{ env.RELEASE_TAG }}" | sed 's/^v//')
-      #     sed -i '/<!-- version-anchor -->/,/<!-- end-version-anchor -->/ {
-      #         /<span id="version">/ {
-      #             s#<span id="version">.*</span>#<span id="version">'"${version}"'</span>#
-      #         }
-      #     }' index.html
+          version=$(echo "${{ env.RELEASE_TAG }}" | sed 's/^v//')
+          sed -i '/<!-- version-anchor -->/,/<!-- end-version-anchor -->/ {
+              /<span id="version">/ {
+                  s#<span id="version">.*</span>#<span id="version">'"${version}"'</span>#
+              }
+          }' index.html
 
-      #     rm -f tbody.tmp
+          rm -f tbody.tmp
 
-      #     git add -A
-      #     git commit -m "Update feed: ${{ env.BUILD_DATE }}"
-      #     git push origin feed --force
+          git add -A
+          git commit -m "Update feed: ${{ env.BUILD_DATE }}"
+          git push origin feed --force
 
       # - name: Generate release markdown
       #   id: generate_release_markdown
       #   run: |
-      #     # 读取 artifacts.json 并生成简单的 markdown 表格
       #     artifacts_file="${{ env.ARTIFACT_DIR }}/artifacts.json"
       #     if [[ ! -f "${artifacts_file}" ]]; then
       #       echo "Error: artifacts.json missing"
