@@ -166,33 +166,25 @@ a:hover {
     margin-bottom: 1rem;
 }
 
-.tab-buttons .divider {
-    height: 2rem;
-    width: 2px;
-    background-color: var(--color-divider);
-    transition: background-color 0.3s;
-}
-
 .tab-buttons button {
     height: 2.5rem;
 }
 
 button {
     font-size: 1rem;
-    text-align: center;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--color-brand-primary);
     background: transparent;
     color: var(--color-brand-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 button.active {
     font-size: 1rem;
-    color: var(--color-text-primary);
-    background-color: var(--color-brand-lighter);
+    background: var(--color-brand-primary);
+    color: #fff;
     font-weight: bolder;
     cursor: default;
 }
@@ -203,7 +195,7 @@ button.active:hover {
 
 button.inactive {
     color: var(--color-brand-primary);
-    background-color: var(--color-brand-light);
+    /* background-color: var(--color-brand-light); */
     opacity: 0.8;
     font-size: 1rem;
     font-weight: bold;
@@ -213,6 +205,16 @@ button.inactive:hover {
     opacity: 1;
     background-color: var(--color-brand-lighter);
     color: var(--color-text-primary);
+}
+
+.version-toggle-container {
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px dashed var(--color-brand-lighter);
+    border-radius: 8px;
 }
 
 
@@ -246,7 +248,8 @@ code {
     font-family: monospace;
     font-size: 0.95rem;
     transition: background-color 0.3s, color 0.3s;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .code-block {
@@ -320,29 +323,103 @@ pre::-webkit-scrollbar-thumb:hover {
     border-color: #10b981;
 }
 
-.arch-section { margin-bottom: 10px; border: 1px solid #e1e4e8; border-radius: 6px; overflow: hidden; }
+.arch-section {
+    margin-bottom: 10px;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    overflow: hidden;
+}
 
-summary { padding: 12px 16px; background-color: #f6f8fa; cursor: pointer; font-weight: 600; outline: none; list-style: none; display: flex; align-items: center; }
-summary::-webkit-details-marker { display: none; } 
-summary::before { content: '▶'; display: inline-block; width: 20px; font-size: 12px; transition: transform 0.2s; }
-details[open] summary::before { transform: rotate(90deg); }
-summary:hover { background-color: #f3f4f6; }
+summary {
+    padding: 12px 16px;
+    background-color: #f6f8fa;
+    cursor: pointer;
+    font-weight: 600;
+    outline: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
 
-table { width: 100%; border-collapse: collapse; background: white; font-size: 14px; }
-th { text-align: left; background: #fafafa; padding: 10px 16px; border-bottom: 1px solid #eee; color: #666; }
-td { padding: 10px 16px; border-bottom: 1px solid #f6f6f6; }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background-color: #fcfcfc; }
+summary::-webkit-details-marker {
+    display: none;
+}
 
-a { color: #0366d6; text-decoration: none; }
-a:hover { text-decoration: underline; }
-.size-cell { color: #6a737d; width: 100px; }
-.date-cell { color: #6a737d; width: 250px; }
+summary::before {
+    content: '▶';
+    display: inline-block;
+    width: 20px;
+    font-size: 12px;
+    transition: transform 0.2s;
+}
+
+details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+summary:hover {
+    background-color: #f3f4f6;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 14px;
+}
+
+th {
+    text-align: left;
+    background: #fafafa;
+    padding: 10px 16px;
+    border-bottom: 1px solid #eee;
+    color: #666;
+}
+
+td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f6f6f6;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: #fcfcfc;
+}
+
+a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.size-cell {
+    color: #6a737d;
+    width: 100px;
+}
+
+.date-cell {
+    color: #6a737d;
+    width: 250px;
+}
 
 span {
     font-size: 1rem;
     display: inline-block;
     margin-right: 1rem;
+}
+
+p {
+    line-height: 2rem;
+}
+
+img {
+    border-radius: 8px;
 }
 
 #security-statement {
@@ -373,6 +450,11 @@ span {
 
     .tab-buttons .divider {
         display: none;
+    }
+
+    .version-toggle-container {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     button {

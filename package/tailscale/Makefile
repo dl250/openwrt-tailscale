@@ -72,7 +72,9 @@ ifneq ($(DISABLE_UPX),1)
 else
 	echo "==> UPX disabled on ARCH $(ARCH)"
 endif
-
+  # Record the size of the binary for reference
+  du -b $(GO_PKG_BUILD_BIN_DIR)/tailscaled | cut -f1 > /builder/bin/packages/$(ARCH)/base/bin.size
+  
 	$(LN) tailscaled $(1)/usr/sbin/tailscale
 	$(INSTALL_BIN) ./files/tailscale.init $(1)/etc/init.d/tailscale
 	$(INSTALL_DATA) ./files/tailscale.conf $(1)/etc/config/tailscale
