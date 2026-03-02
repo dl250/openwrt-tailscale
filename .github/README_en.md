@@ -2,6 +2,14 @@
 
 ![Tailscale & OpenWrt](./banner.png)
 
+# 由于正在更新对OpenWrt 25.12的支持，安装脚本暂时不可用
+# 但可自行安装release当中的apk、ipk包
+# 或使用软件源安装（推荐）
+
+# Due to ongoing updates for OpenWrt 25.12 support, the installation script is temporarily unavailable.
+# However, you can manually install the apk and ipk packages from the releases,
+# or use the OPKG feed for easier installation (recommended).
+
 # The Latest, Smaller Tailscale for OpenWrt Devices
 
 ![GitHub release](https://img.shields.io/github/v/release/GuNanOvO/openwrt-tailscale?style=flat)

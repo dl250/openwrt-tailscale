@@ -2,6 +2,10 @@
 
 ![Tailscale & OpenWrt](./banner.png)  
 
+# 由于正在更新对OpenWrt 25.12的支持，安装脚本暂时不可用
+# 但可自行安装release当中的apk、ipk包
+# 或使用软件源安装（推荐）
+
 # 适用于 OpenWrt 设备的 最新的、更小的 Tailscale 
 
 ![GitHub release](https://img.shields.io/github/v/release/GuNanOvO/openwrt-tailscale?style=flat)
